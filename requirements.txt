@@ -1,0 +1,3 @@
+circup
+pdbpp
+adafruit-circuitpython-typing
