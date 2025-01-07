@@ -3,24 +3,12 @@ import time
 import board
 import gc
 import displayio
-from adafruit_bitmap_font import bitmap_font
-from adafruit_display_text.label import Label
+import terminalio
+from adafruit_display_text import label
 import adafruit_ssd1327
 import adafruit_vl6180x
 import adafruit_ahtx0
 
-try:
-    cwd = ("/" + __file__).rsplit("/", 1)[0]
-except:
-    cwd = "/"
-
-fonts = [
-    file
-    for file in os.listdir(cwd + "/fonts/")
-    if (file.endswith(".bdf") and not file.startswith("._"))
-]
-for i, filename in enumerate(fonts):
-    fonts[i] = cwd + "/fonts/" + filename
 
 # i2c boards:
 #   0x3c: 128x128 oled
@@ -39,41 +27,22 @@ full_level = 20
 
 aht20_sensor = adafruit_ahtx0.AHTx0(i2c)
 
-def draw_text(msg):
-    display_height = 128
-    display_width = 128
-    display_font = fonts[0]
-    font = bitmap_font.load_font(display_font)
-    font.load_glyphs(msg.encode("utf-8"))
+def draw_text(text, scale=1):
     splash = displayio.Group()
     display.root_group = splash
 
-    # Make a background color fill
-    color_bitmap = displayio.Bitmap(display_height, display_width, 1)
-    color_palette = displayio.Palette(1)
-    color_palette[0] = 0xFFFFFF
-    bg_sprite = displayio.TileGrid(color_bitmap, pixel_shader=color_palette, x=0, y=0)
-    splash.append(bg_sprite)
-
-    text = Label(font, text=msg)
-    text.x = 20
-    text.y = 100
-    text.color = 0x0
-
-    dims = text.bounding_box
-    textbg_bitmap = displayio.Bitmap(dims[2], dims[3], 1)
-    textbg_palette = displayio.Palette(1)
-    textbg_palette[0] = 0xFF0000
-    textbg_sprite = displayio.TileGrid(textbg_bitmap, pixel_shader=textbg_palette, x=text.x + dims[0], y=text.y + dims[1])
-    splash.append(textbg_sprite)
-    splash.append(text)
-    display.refresh(target_frames_per_second=60)
-    
+    # Draw a label
+    text_area = label.Label(terminalio.FONT, text=text, color=0xFFFFFF)
+    text_width = text_area.bounding_box[2] * scale
+    text_group = displayio.Group(
+        scale=scale,
+        x=display.width // 2 - text_width // 2,
+        y=display.height // 2,
+    )
+    text_group.append(text_area)  # Subgroup for text scaling
+    splash.append(text_group)
 
 while True:
-    # just random stuff we may keep track of
-    mem_free = gc.mem_free()
-
     # sensor readings
     range = distance_sensor.range
     temperature = aht20_sensor.temperature
