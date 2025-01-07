@@ -31,7 +31,6 @@ def draw_text(text, scale=1):
     splash = displayio.Group()
     display.root_group = splash
 
-    # Draw a label
     text_area = label.Label(terminalio.FONT, text=text, color=0xFFFFFF)
     text_width = text_area.bounding_box[2] * scale
     text_group = displayio.Group(
@@ -48,7 +47,9 @@ while True:
     temperature = aht20_sensor.temperature
     humidity = aht20_sensor.relative_humidity
 
-    draw_text(f"temperature: {str(temperature)}\nhumidity: {str(humidity)}\nrange: {str(range)}")
-    # msg=f"temperature: {str(temperature)}\nhumidity: {str(humidity)}\nrange: {str(range)}"
+    curr_pcnt = empty_level / range * 10
+
+    msg = f"temperature: {str(temperature)}\nhumidity: {str(humidity)}\nrange: {str(range)}\npcnt full: {curr_pcnt}"
+    draw_text(msg)
     
     time.sleep(5)
