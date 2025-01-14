@@ -17,4 +17,3 @@ pyenv activate $venv_name
 pip install -r requirements.txt
 
 circup install --auto-file code.py 
-rsync -av fonts/*.bdf* $mount_path/fonts/
